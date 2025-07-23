@@ -18,7 +18,7 @@ class NoteController(
         val title: String,
         val content: String,
         val color: Long,
-        val ownerId: String
+//        val ownerId: String
     )
 
     data class NoteResponse(
@@ -30,7 +30,9 @@ class NoteController(
     )
 
     @PostMapping
-    fun saveNote(body: NoteRequest): NoteResponse {
+    fun saveNote(
+        @RequestBody
+        body: NoteRequest): NoteResponse {
 
       val note = repository.save(
 
@@ -42,7 +44,7 @@ class NoteController(
                 content = body.content,
                 color = body.color,
                 createdAt = Instant.now(),
-                ownerId = ObjectId(body.ownerId)
+                ownerId = ObjectId()
             )
         )
         return note.toResponse()
