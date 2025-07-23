@@ -1,13 +1,11 @@
 package com.kotlinprojectdev.spring_boot_course.controllers
 
+import com.kotlinprojectdev.spring_boot_course.controllers.NoteController.NoteResponse
 import com.kotlinprojectdev.spring_boot_course.database.model.Note
 import com.kotlinprojectdev.spring_boot_course.database.repository.NoteRepository
 import org.bson.types.ObjectId
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.time.Instant
-import java.util.Date
 
 @RestController
 @RequestMapping("/notes")
@@ -31,10 +29,10 @@ class NoteController(
         val createdAt: Instant
     )
 
-    @PostMapping("/notes/savenote")
+    @PostMapping
     fun saveNote(body: NoteRequest): NoteResponse {
 
-      val note =  repository.save(
+      val note = repository.save(
 
             Note(
                 id = body.id?.let {
@@ -47,14 +45,27 @@ class NoteController(
                 ownerId = ObjectId(body.ownerId)
             )
         )
-        return NoteResponse(
-            id = note.id.toHexString(),
-            title = note.title,
-            content = note.title,
-            color = note.color,
-            createdAt = note.createdAt
-        )
-
-
+        return note.toResponse()
     }
+
+    @GetMapping
+    fun findByOwnerId(
+        @RequestParam(required = true)
+        ownerId: String
+    ): List<NoteResponse> {
+        return repository.findByOwnerId(ObjectId(ownerId)).map {
+            it.toResponse()
+        }
+    }
+
+}
+
+private fun Note.toResponse(): NoteController.NoteResponse {
+    return NoteResponse(
+        id = id.toHexString(),
+        title = title,
+        content = title,
+        color = color,
+        createdAt = createdAt
+    )
 }
